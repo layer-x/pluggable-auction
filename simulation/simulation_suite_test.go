@@ -30,6 +30,7 @@ import (
 
 	"testing"
 	"time"
+	"github.com/codegangsta/martini"
 )
 
 var communicationMode string
@@ -77,11 +78,40 @@ func TestAuction(t *testing.T) {
 	RunSpecs(t, "Auction Suite")
 }
 
+var brain auctionrunner.Brain
+
+var ListenForBrain = func() {
+	fmt.Printf("\n\n\nILACKARMS\n\n\n")
+	brainChan := make(chan auctionrunner.Brain)
+	m := martini.Classic()
+	m.Post("/Start", func(req *http.Request) {
+		data, err := ioutil.ReadAll(req.Body)
+		if req.Body != nil {
+			defer req.Body.Close()
+		}
+		if err != nil {
+			fmt.Printf("\n\nSomething really bad happened! Couldnt read NEW BRAIN request: %v\n\n", err)
+			os.Exit(-1)
+		}
+		var newBrain auctionrunner.Brain
+		err = json.Unmarshal(data, &newBrain)
+		if err != nil {
+			fmt.Printf("\n\nSomething really bad happened! Couldnt read unmarshall %s to NEW BRAIN: %v\n\n", string(data), err)
+			os.Exit(-1)
+		}
+		brainChan <- newBrain
+		fmt.Printf("\n\n\nLETS A GO\n\n\n")
+	})
+	go m.Run()
+	brain = <- brainChan
+}
+
 var _ = BeforeSuite(func() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	fmt.Printf("Running in %s communicationMode\n", communicationMode)
 
 	startReport()
+	ListenForBrain()
 
 	logger = lager.NewLogger("sim")
 	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
@@ -96,7 +126,6 @@ var _ = BeforeSuite(func() {
 		panic(fmt.Sprintf("unknown communication mode: %s", communicationMode))
 	}
 })
-
 var _ = BeforeEach(func() {
 	var err error
 	workPool, err = workpool.NewWorkPool(workers)
@@ -123,6 +152,7 @@ var _ = BeforeEach(func() {
 		clock.NewClock(),
 		workPool,
 		logger,
+		brain,
 	)
 	runnerProcess = ifrit.Invoke(runner)
 })

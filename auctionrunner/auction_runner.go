@@ -10,11 +10,6 @@ import (
 	"github.com/cloudfoundry-incubator/auction/auctiontypes"
 	"github.com/cloudfoundry-incubator/auctioneer"
 	"github.com/cloudfoundry/gunk/workpool"
-	"fmt"
-	"github.com/codegangsta/martini"
-"net/http"
-"io/ioutil"
-"encoding/json"
 )
 
 type auctionRunner struct {
@@ -33,35 +28,8 @@ func New(
 	clock clock.Clock,
 	workPool *workpool.WorkPool,
 	logger lager.Logger,
+	brain Brain,
 ) *auctionRunner {
-
-	fmt.Printf("\n\n\nILACKARMS\n\n\n")
-	brainChan := make(chan Brain)
-	m := martini.Classic()
-	m.Post("/Start", func(req *http.Request) {
-		data, err := ioutil.ReadAll(req.Body)
-		if req.Body != nil {
-			defer req.Body.Close()
-		}
-		if err != nil {
-			fmt.Printf("\n\nSomething really bad happened! Couldnt read NEW BRAIN request: %v\n\n", err)
-			os.Exit(-1)
-		}
-		var newBrain Brain
-		err = json.Unmarshal(data, &newBrain)
-		if err != nil {
-			fmt.Printf("\n\nSomething really bad happened! Couldnt read unmarshall %s to NEW BRAIN: %v\n\n", string(data), err)
-			os.Exit(-1)
-		}
-		brainChan <- newBrain
-		fmt.Printf("\n\n\nLETS A GO\n\n\n")
-	})
-	go m.Run()
-//	select{
-//	case <-brainChan:
-//		fmt.Printf("\n\n\nLETS A GO\n\n\n")
-//	}
-//	fmt.Printf("\n\n\nBABY!\n\n\n")
 
 	return &auctionRunner{
 		delegate:      delegate,
@@ -70,7 +38,7 @@ func New(
 		clock:         clock,
 		workPool:      workPool,
 		logger:        logger,
-		brain: <-brainChan,
+		brain: brain,
 	}
 }
 
