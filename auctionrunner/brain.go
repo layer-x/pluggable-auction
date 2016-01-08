@@ -10,9 +10,21 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
-type Brain struct {
+type Brain interface {
+	ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *auctiontypes.LRPAuction) (*Cell, error)
+	ChooseTaskAuctionWinner(zoneMap map[string]Zone, taskAuction *auctiontypes.TaskAuction) (*Cell, error)
+}
+
+type brain struct {
 	Name string `json:"name"`
 	Url string `json:"url"`
+}
+
+func NewBrain(name, url string) *brain {
+	return &brain{
+		Name: name,
+		Url: url,
+	}
 }
 
 type AuctionLRPRequest struct {
@@ -47,7 +59,7 @@ func newSerializableCellStateFromReal(r rep.CellState) *SerializableCellState {
 	}
 }
 
-func (b *Brain) ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *auctiontypes.LRPAuction) (*Cell, error) {
+func (b *brain) ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *auctiontypes.LRPAuction) (*Cell, error) {
 	auctionLRPRequest := AuctionLRPRequest{
 		LRP: lrpAuction.LRP,
 	}
@@ -94,7 +106,7 @@ func (b *Brain) ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *auct
 	return winnerCell, nil
 }
 
-func (b *Brain) ChooseTaskAuctionWinner(zoneMap map[string]Zone, taskAuction *auctiontypes.TaskAuction) (*Cell, error) {
+func (b *brain) ChooseTaskAuctionWinner(zoneMap map[string]Zone, taskAuction *auctiontypes.TaskAuction) (*Cell, error) {
 	auctionTaskRequest := AuctionTaskRequest{
 		Task: taskAuction.Task,
 	}

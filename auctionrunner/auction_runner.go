@@ -19,7 +19,7 @@ type auctionRunner struct {
 	clock         clock.Clock
 	workPool      *workpool.WorkPool
 	logger        lager.Logger
-	brain         Brain
+	brain Brain
 }
 
 func New(

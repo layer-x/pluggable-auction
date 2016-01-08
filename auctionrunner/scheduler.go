@@ -31,7 +31,7 @@ type Scheduler struct {
 	zones    map[string]Zone
 	clock    clock.Clock
 	logger   lager.Logger
-	brain         Brain
+	brain Brain
 }
 
 func NewScheduler(
