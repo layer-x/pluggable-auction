@@ -31,6 +31,7 @@ type Scheduler struct {
 	zones    map[string]Zone
 	clock    clock.Clock
 	logger   lager.Logger
+	brain         Brain
 }
 
 func NewScheduler(
@@ -38,12 +39,14 @@ func NewScheduler(
 	zones map[string]Zone,
 	clock clock.Clock,
 	logger lager.Logger,
+	brain         Brain,
 ) *Scheduler {
 	return &Scheduler{
 		workPool: workPool,
 		zones:    zones,
 		clock:    clock,
 		logger:   logger,
+		brain: brain,
 	}
 }
 
@@ -202,46 +205,18 @@ func (s *Scheduler) commitCells() []rep.Work {
 
 func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*auctiontypes.LRPAuction, error) {
 	var winnerCell *Cell
-	winnerScore := 1e20
 
-	zones := accumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
-
-	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
-
-	if len(filteredZones) == 0 {
-		return nil, auctiontypes.ErrorCellMismatch
-	}
-
-	sortedZones := sortZonesByInstances(filteredZones)
-
-	for zoneIndex, lrpByZone := range sortedZones {
-		for _, cell := range lrpByZone.zone {
-			score, err := cell.ScoreForLRP(&lrpAuction.LRP)
-			if err != nil {
-				continue
-			}
-
-			if score < winnerScore {
-				winnerScore = score
-				winnerCell = cell
-			}
-		}
-
-		if zoneIndex+1 < len(sortedZones) &&
-			lrpByZone.instances == sortedZones[zoneIndex+1].instances {
-			continue
-		}
-
-		if winnerCell != nil {
-			break
-		}
+	winnerCell, err := s.brain.ChooseLRPAuctionWinner(s.zones, lrpAuction)
+	if err != nil {
+		s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
+		return nil, err
 	}
 
 	if winnerCell == nil {
 		return nil, rep.ErrorInsufficientResources
 	}
 
-	err := winnerCell.ReserveLRP(&lrpAuction.LRP)
+	err = winnerCell.ReserveLRP(&lrpAuction.LRP)
 	if err != nil {
 		s.logger.Error("lrp-failed-to-reserve-cell", err, lager.Data{"cell-guid": winnerCell.Guid, "lrp-guid": lrpAuction.Identifier()})
 		return nil, err
@@ -254,40 +229,18 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (*auctiontypes.TaskAuction, error) {
 	var winnerCell *Cell
-	winnerScore := 1e20
 
-	filteredZones := []Zone{}
-
-	for _, zone := range s.zones {
-		cells := zone.FilterCells(taskAuction.RootFs)
-		if len(cells) > 0 {
-			filteredZones = append(filteredZones, Zone(cells))
-		}
-	}
-
-	if len(filteredZones) == 0 {
-		return nil, auctiontypes.ErrorCellMismatch
-	}
-
-	for _, zone := range filteredZones {
-		for _, cell := range zone {
-			score, err := cell.ScoreForTask(&taskAuction.Task)
-			if err != nil {
-				continue
-			}
-
-			if score < winnerScore {
-				winnerScore = score
-				winnerCell = cell
-			}
-		}
+	winnerCell, err := s.brain.ChooseTaskAuctionWinner(s.zones, taskAuction)
+	if err != nil {
+		s.logger.Error("brain-task-auction-failed", err, lager.Data{"task-guid": taskAuction.Identifier()})
+		return nil, err
 	}
 
 	if winnerCell == nil {
 		return nil, rep.ErrorInsufficientResources
 	}
 
-	err := winnerCell.ReserveTask(&taskAuction.Task)
+	err = winnerCell.ReserveTask(&taskAuction.Task)
 	if err != nil {
 		s.logger.Error("task-failed-to-reserve-cell", err, lager.Data{"cell-guid": winnerCell.Guid, "task-guid": taskAuction.Identifier()})
 		return nil, err
