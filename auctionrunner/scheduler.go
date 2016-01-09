@@ -31,7 +31,7 @@ type Scheduler struct {
 	zones    map[string]Zone
 	clock    clock.Clock
 	logger   lager.Logger
-	brain Brain
+	brains map[string]Brain
 }
 
 func NewScheduler(
@@ -39,14 +39,14 @@ func NewScheduler(
 	zones map[string]Zone,
 	clock clock.Clock,
 	logger lager.Logger,
-	brain         Brain,
+	brains map[string]Brain,
 ) *Scheduler {
 	return &Scheduler{
 		workPool: workPool,
 		zones:    zones,
 		clock:    clock,
 		logger:   logger,
-		brain: brain,
+		brains: brains,
 	}
 }
 
@@ -206,7 +206,7 @@ func (s *Scheduler) commitCells() []rep.Work {
 func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*auctiontypes.LRPAuction, error) {
 	var winnerCell *Cell
 
-	winnerCell, err := s.brain.ChooseLRPAuctionWinner(s.zones, lrpAuction)
+	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(s.zones, lrpAuction)
 	if err != nil {
 		s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
 		return nil, err
@@ -230,7 +230,7 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (*auctiontypes.TaskAuction, error) {
 	var winnerCell *Cell
 
-	winnerCell, err := s.brain.ChooseTaskAuctionWinner(s.zones, taskAuction)
+	winnerCell, err := s.brains["default"].ChooseTaskAuctionWinner(s.zones, taskAuction)
 	if err != nil {
 		s.logger.Error("brain-task-auction-failed", err, lager.Data{"task-guid": taskAuction.Identifier()})
 		return nil, err

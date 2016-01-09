@@ -31,6 +31,7 @@ import (
 	"testing"
 	"time"
 	"github.com/codegangsta/martini"
+	"strings"
 )
 
 var communicationMode string
@@ -78,11 +79,12 @@ func TestAuction(t *testing.T) {
 	RunSpecs(t, "Auction Suite")
 }
 
-var brain auctionrunner.Brain
 
+var brains = make(map[string]auctionrunner.Brain)
+var defaultBrain auctionrunner.Brain
 var ListenForBrain = func() {
-	fmt.Printf("\n\n\nILACKARMS\n\n\n")
-	brainChan := make(chan auctionrunner.Brain)
+	fmt.Printf("\nLISTENING FOR A DEFAULT BRAIN\n")
+	defaultBrainChan := make(chan auctionrunner.Brain)
 	m := martini.Classic()
 	m.Post("/Start", func(req *http.Request) {
 		data, err := ioutil.ReadAll(req.Body)
@@ -96,18 +98,29 @@ var ListenForBrain = func() {
 		var newBrainData struct{
 			Name string `json:"name"`
 			Url string `json:"url"`
+			Tags string `json:"tags"`
 		}
 		err = json.Unmarshal(data, &newBrainData)
 		if err != nil {
 			fmt.Printf("\n\nSomething really bad happened! Couldnt read unmarshall %s to NEW BRAIN: %v\n\n", string(data), err)
 			os.Exit(-1)
 		}
-		newBrain := auctionrunner.NewBrain(newBrainData.Name, newBrainData.Url)
-		brainChan <- newBrain
-		fmt.Printf("\n\n\nLETS A GO\n\n\n")
+		newBrain := auctionrunner.NewBrain(newBrainData.Name, newBrainData.Url, newBrainData.Tags)
+		if strings.Contains(newBrainData.Tags, "default") {
+			if _, ok := brains["default"] ; !ok {
+				defaultBrainChan <- newBrain
+				fmt.Printf("\nLETS A GO\n")
+			}
+		}
+		tags := strings.Split(newBrainData.Tags, ",")
+		for _, tag := range tags {
+			fmt.Printf("\nAdding Brain: %s to task-type %s\n", newBrain.Name, tag)
+			brains[tag] = newBrain
+		}
 	})
 	go m.Run()
-	brain = <- brainChan
+	defaultBrain = <-defaultBrainChan
+	brains["default"] = defaultBrain
 }
 
 var _ = BeforeSuite(func() {
@@ -156,7 +169,7 @@ var _ = BeforeEach(func() {
 		clock.NewClock(),
 		workPool,
 		logger,
-		brain,
+		brains,
 	)
 	runnerProcess = ifrit.Invoke(runner)
 })

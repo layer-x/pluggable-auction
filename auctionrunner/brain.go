@@ -18,12 +18,14 @@ type Brain interface {
 type brain struct {
 	Name string `json:"name"`
 	Url string `json:"url"`
+	Tags string `json:"tags"`
 }
 
-func NewBrain(name, url string) *brain {
+func NewBrain(name, url string, tags string) *brain {
 	return &brain{
 		Name: name,
 		Url: url,
+		Tags: tags,
 	}
 }
 
