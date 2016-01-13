@@ -206,6 +206,8 @@ func (s *Scheduler) commitCells() []rep.Work {
 func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*auctiontypes.LRPAuction, error) {
 	var winnerCell *Cell
 
+	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
+
 	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(s.zones, lrpAuction)
 	if err != nil {
 		s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
@@ -229,6 +231,8 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (*auctiontypes.TaskAuction, error) {
 	var winnerCell *Cell
+
+	s.logger.Info("Task-info",  lager.Data{"taskAuction": taskAuction}, lager.Data{"lrp-domain": taskAuction.Domain})
 
 	winnerCell, err := s.brains["default"].ChooseTaskAuctionWinner(s.zones, taskAuction)
 	if err != nil {
