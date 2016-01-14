@@ -208,11 +208,11 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
 
-	zones := accumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
+	zones := AccumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
 
 
 	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
-	filteredZones = sortZonesByInstances(filteredZones)
+	filteredZones = SortZonesByInstances(filteredZones)
 
 	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(filteredZones, lrpAuction)
 	if err != nil {

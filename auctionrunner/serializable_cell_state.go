@@ -4,6 +4,7 @@ import (
 "io"
 "crypto/rand"
 	"fmt"
+	"github.com/pivotal-golang/lager"
 )
 
 type SerializableCellState struct {
@@ -14,20 +15,20 @@ type SerializableCellState struct {
 	Tasks              []rep.Task `json:"Tasks"`
 	Zone               string `json:"Zone"`
 	Evacuating         bool `json:"Evacuating"`
-	Instances int `json:"instances"`
+	Guid			   string `json:"Guid"`
 }
 
-func newSerializableCellStateFromReal(r rep.CellState, instances int) *SerializableCellState {
+func newSerializableCellStateFromReal(cell *Cell) *SerializableCellState {
 	uuid, _ := newUUID()
 	return &SerializableCellState{
 		Id: uuid,
-		AvailableResources: r.AvailableResources,
-		TotalResources: r.TotalResources,
-		LRPs: r.LRPs,
-		Tasks: r.Tasks,
-		Zone: r.Zone,
-		Evacuating: r.Evacuating,
-		Instances: instances,
+		AvailableResources: cell.state.AvailableResources,
+		TotalResources: cell.state.TotalResources,
+		LRPs: cell.state.LRPs,
+		Tasks: cell.state.Tasks,
+		Zone: cell.state.Zone,
+		Evacuating: cell.state.Evacuating,
+		Guid: cell.Guid,
 	}
 }
 
@@ -85,8 +86,17 @@ func (c *SerializableCellState) ResourceMatch(res rep.Resource) error {
 	}
 }
 
-func (c SerializableCellState) ComputeScore(res *rep.Resource) float64 {
+func (c *SerializableCellState) ComputeScore(res *rep.Resource) float64 {
 	remainingResources := c.AvailableResources.Copy()
 	remainingResources.Subtract(res)
 	return remainingResources.ComputeScore(&c.TotalResources)
+}
+
+func (c *SerializableCellState) ToAuctionrunnerCell() *Cell {
+	logger := lager.NewLogger("deserialized_cell")
+	guid := c.Guid
+	emptyClient := rep.NewClient(nil, nil, "no-address")
+	emptyRootFsProvider := make(map[string]rep.RootFSProvider)
+	state := rep.NewCellState(emptyRootFsProvider, c.AvailableResources, c.TotalResources, c.LRPs, c.Tasks, c.Zone, c.Evacuating)
+	return NewCell(logger, guid, emptyClient, state)
 }

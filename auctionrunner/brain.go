@@ -45,8 +45,8 @@ func (b *brain) ChooseLRPAuctionWinner(filteredZones []lrpByZone, lrpAuction *au
 	}
 	cellIdMap := make(map[string]*Cell)
 	for _, zone := range filteredZones {
-		for _, cell := range zone.zone {
-			serializableCell :=  newSerializableCellStateFromReal(cell.state, zone.instances)
+		for _, cell := range zone.Zone {
+			serializableCell :=  newSerializableCellStateFromReal(cell)
 			cellIdMap[serializableCell.Id] = cell
 			auctionLRPRequest.SerializableCellStates = append(auctionLRPRequest.SerializableCellStates, serializableCell)
 		}
@@ -93,7 +93,7 @@ func (b *brain) ChooseTaskAuctionWinner(filteredZones []Zone, taskAuction *aucti
 	cellIdMap := make(map[string]*Cell)
 	for _, zone := range filteredZones {
 		for _, cell := range zone {
-			serializableCell :=  newSerializableCellStateFromReal(cell.state, 0)
+			serializableCell :=  newSerializableCellStateFromReal(cell)
 			cellIdMap[serializableCell.Id] = cell
 			auctionTaskRequest.SerializableCellStates = append(auctionTaskRequest.SerializableCellStates, serializableCell)
 		}

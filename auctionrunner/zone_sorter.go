@@ -3,8 +3,8 @@ package auctionrunner
 import "sort"
 
 type lrpByZone struct {
-	zone      Zone
-	instances int
+	Zone Zone
+	Instances int
 }
 
 type zoneSorterByInstances struct {
@@ -13,9 +13,9 @@ type zoneSorterByInstances struct {
 
 func (s zoneSorterByInstances) Len() int           { return len(s.zones) }
 func (s zoneSorterByInstances) Swap(i, j int)      { s.zones[i], s.zones[j] = s.zones[j], s.zones[i] }
-func (s zoneSorterByInstances) Less(i, j int) bool { return s.zones[i].instances < s.zones[j].instances }
+func (s zoneSorterByInstances) Less(i, j int) bool { return s.zones[i].Instances < s.zones[j].Instances }
 
-func accumulateZonesByInstances(zones map[string]Zone, processGuid string) []lrpByZone {
+func AccumulateZonesByInstances(zones map[string]Zone, processGuid string) []lrpByZone {
 	lrpZones := []lrpByZone{}
 
 	for _, zone := range zones {
@@ -32,7 +32,7 @@ func accumulateZonesByInstances(zones map[string]Zone, processGuid string) []lrp
 	return lrpZones
 }
 
-func sortZonesByInstances(zones []lrpByZone) []lrpByZone {
+func SortZonesByInstances(zones []lrpByZone) []lrpByZone {
 	sorter := zoneSorterByInstances{zones: zones}
 	sort.Sort(sorter)
 	return sorter.zones
@@ -42,11 +42,11 @@ func filterZonesByRootFS(zones []lrpByZone, rootFS string) []lrpByZone {
 	filteredZones := []lrpByZone{}
 
 	for _, lrpZone := range zones {
-		cells := lrpZone.zone.FilterCells(rootFS)
+		cells := lrpZone.Zone.FilterCells(rootFS)
 		if len(cells) > 0 {
 			filteredZone := lrpByZone{
-				zone:      Zone(cells),
-				instances: lrpZone.instances,
+				Zone:      Zone(cells),
+				Instances: lrpZone.Instances,
 			}
 			filteredZones = append(filteredZones, filteredZone)
 		}

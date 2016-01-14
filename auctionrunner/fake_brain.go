@@ -24,10 +24,10 @@ func (b *fakeBrain) ChooseLRPAuctionWinner(filteredZones []lrpByZone, lrpAuction
 		return nil, auctiontypes.ErrorCellMismatch
 	}
 
-	sortedZones := sortZonesByInstances(filteredZones)
+	sortedZones := SortZonesByInstances(filteredZones)
 
 	for zoneIndex, lrpByZone := range sortedZones {
-		for _, cell := range lrpByZone.zone {
+		for _, cell := range lrpByZone.Zone {
 			score, err := cell.ScoreForLRP(&lrpAuction.LRP)
 			if err != nil {
 				continue
@@ -40,7 +40,7 @@ func (b *fakeBrain) ChooseLRPAuctionWinner(filteredZones []lrpByZone, lrpAuction
 		}
 
 		if zoneIndex+1 < len(sortedZones) &&
-		lrpByZone.instances == sortedZones[zoneIndex+1].instances {
+		lrpByZone.Instances == sortedZones[zoneIndex+1].Instances {
 			continue
 		}
 

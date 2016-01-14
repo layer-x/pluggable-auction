@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"encoding/json"
 	"github.com/cloudfoundry-incubator/auction/auctionrunner"
-	"sort"
+	"sync"
 )
 
 func main() {
+	lock := &sync.Mutex{}
 	port := ":6666"
 	m := martini.Classic()
 	m.Post("/AuctionLRP", func(req *http.Request, res http.ResponseWriter) {
@@ -33,26 +34,41 @@ func main() {
 		winnerScore := 1e20
 		var winnerCell *auctionrunner.SerializableCellState
 
-		for _, cell := range auctionLRPRequest.SerializableCellStates {
-//		for zoneIndex, cell := range auctionLRPRequest.SerializableCellStates {
-			score, err := cell.ScoreForLRP(&auctionLRPRequest.LRP)
-			if err != nil {
-				continue
-			}
+		zones := make(map[string]auctionrunner.Zone)
+		realCellsToSerialized := make(map[*auctionrunner.Cell]*auctionrunner.SerializableCellState)
+		for _, serializedCell := range auctionLRPRequest.SerializableCellStates {
+			cell := serializedCell.ToAuctionrunnerCell()
+			lock.Lock()
+			zones[serializedCell.Zone] = append(zones[serializedCell.Zone], cell)
+			realCellsToSerialized[cell] = serializedCell
+			lock.Unlock()
+		}
 
-			if score < winnerScore {
-				winnerScore = score
-				winnerCell = cell
-			}
+		sortedZones := auctionrunner.AccumulateZonesByInstances(zones, auctionLRPRequest.LRP.ProcessGuid)
+//		sortedZones = auctionrunner.SortZonesByInstances(sortedZones)
 
-//			if zoneIndex + 1 < len(auctionLRPRequest.SerializableCellStates) &&
-//			cell.Instances == auctionLRPRequest.SerializableCellStates[zoneIndex + 1].Instances {
-//				continue
-//			}
-//
-//			if winnerCell != nil {
-//				break
-//			}
+		for zoneIndex, lrpByZone := range sortedZones {
+			for _, realCell := range lrpByZone.Zone {
+				cell := realCellsToSerialized[realCell]
+				score, err := cell.ScoreForLRP(&auctionLRPRequest.LRP)
+				if err != nil {
+					continue
+				}
+
+				if score < winnerScore {
+					winnerScore = score
+					winnerCell = cell
+				}
+
+				if zoneIndex + 1 < len(sortedZones) &&
+				lrpByZone.Instances == sortedZones[zoneIndex + 1].Instances {
+					continue
+				}
+
+				if winnerCell != nil {
+					break
+				}
+			}
 		}
 
 		if winnerCell != nil {
@@ -118,59 +134,4 @@ func main() {
 		return
 	})
 	m.RunOnAddr(port)
-}
-
-
-
-type lrpByZone struct {
-	zone      auctionrunner.Zone
-	instances int
-}
-
-type zoneSorterByInstances struct {
-	zones []lrpByZone
-}
-
-func (s zoneSorterByInstances) Len() int           { return len(s.zones) }
-func (s zoneSorterByInstances) Swap(i, j int)      { s.zones[i], s.zones[j] = s.zones[j], s.zones[i] }
-func (s zoneSorterByInstances) Less(i, j int) bool { return s.zones[i].instances < s.zones[j].instances }
-
-func accumulateZonesByInstances(zones map[string]auctionrunner.Zone, processGuid string) []lrpByZone {
-	lrpZones := []lrpByZone{}
-
-	for _, zone := range zones {
-		instances := 0
-		for _, cell := range zone {
-			for i := range cell.GetState().LRPs {
-				if cell.GetState().LRPs[i].ProcessGuid == processGuid {
-					instances++
-				}
-			}
-		}
-		lrpZones = append(lrpZones, lrpByZone{zone, instances})
-	}
-	return lrpZones
-}
-
-func sortZonesByInstances(zones []lrpByZone) []lrpByZone {
-	sorter := zoneSorterByInstances{zones: zones}
-	sort.Sort(sorter)
-	return sorter.zones
-}
-
-func filterZonesByRootFS(zones []lrpByZone, rootFS string) []lrpByZone {
-	filteredZones := []lrpByZone{}
-
-	for _, lrpZone := range zones {
-		cells := lrpZone.zone.FilterCells(rootFS)
-		if len(cells) > 0 {
-			filteredZone := lrpByZone{
-				zone:      auctionrunner.Zone(cells),
-				instances: lrpZone.instances,
-			}
-			filteredZones = append(filteredZones, filteredZone)
-		}
-	}
-
-	return filteredZones
 }
