@@ -10,6 +10,7 @@ import (
 	"github.com/cloudfoundry/gunk/workpool"
 	"github.com/pivotal-golang/clock"
 	"github.com/pivotal-golang/lager"
+	"strings"
 )
 
 type Zone []*Cell
@@ -205,19 +206,41 @@ func (s *Scheduler) commitCells() []rep.Work {
 
 func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*auctiontypes.LRPAuction, error) {
 	var winnerCell *Cell
+	var err error
 
 	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
 
 	zones := AccumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
 
-
 	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
 	filteredZones = SortZonesByInstances(filteredZones)
 
-	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(filteredZones, lrpAuction)
-	if err != nil {
-		s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
-		return nil, err
+	tags := strings.Split(lrpAuction.LRP.ActualLRPKey.ProcessGuid, ",") //get tags off of LRP id
+
+	//send known zones to ui
+	if uiBrain, ok := s.brains["ui"]; ok {
+		uiBrain.ChooseLRPAuctionWinner(filteredZones, lrpAuction)
+	}
+
+	var brainFound bool
+	for _, tag := range tags {
+		brain, ok := s.brains[tag]
+		if ok {
+			brainFound = true
+			winnerCell, err = brain.ChooseLRPAuctionWinner(filteredZones, lrpAuction)
+			if err != nil {
+				s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
+				return nil, err
+			}
+		}
+	}
+
+	if !brainFound {
+		winnerCell, err = s.brains["default"].ChooseLRPAuctionWinner(filteredZones, lrpAuction)
+		if err != nil {
+			s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
+			return nil, err
+		}
 	}
 
 	if winnerCell == nil {
@@ -237,6 +260,7 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (*auctiontypes.TaskAuction, error) {
 	var winnerCell *Cell
+	var err error
 
 	s.logger.Info("Task-info",  lager.Data{"taskAuction": taskAuction}, lager.Data{"lrp-domain": taskAuction.Domain})
 
@@ -253,10 +277,33 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 		return nil, auctiontypes.ErrorCellMismatch
 	}
 
-	winnerCell, err := s.brains["default"].ChooseTaskAuctionWinner(filteredZones, taskAuction)
-	if err != nil {
-		s.logger.Error("brain-task-auction-failed", err, lager.Data{"task-guid": taskAuction.Identifier()})
-		return nil, err
+
+
+	//send known zones to ui
+	if uiBrain, ok := s.brains["ui"]; ok {
+		uiBrain.ChooseTaskAuctionWinner(filteredZones, taskAuction)
+	}
+	tags := strings.Split(taskAuction.Task.TaskGuid, ",") //get tags off of LRP id
+	var brainFound bool
+	for _, tag := range tags {
+		brain, ok := s.brains[tag]
+		if ok {
+			brainFound = true
+			winnerCell, err = brain.ChooseTaskAuctionWinner(filteredZones, taskAuction)
+			if err != nil {
+				s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": taskAuction.Identifier()})
+				return nil, err
+			}
+			break
+		}
+	}
+
+	if !brainFound {
+		winnerCell, err = s.brains["default"].ChooseTaskAuctionWinner(filteredZones, taskAuction)
+		if err != nil {
+			s.logger.Error("brain-task-auction-failed", err, lager.Data{"task-guid": taskAuction.Identifier()})
+			return nil, err
+		}
 	}
 
 	if winnerCell == nil {
