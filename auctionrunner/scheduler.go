@@ -208,7 +208,13 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
 
-	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(s.zones, lrpAuction)
+	zones := accumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
+
+
+	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
+	filteredZones = sortZonesByInstances(filteredZones)
+
+	winnerCell, err := s.brains["default"].ChooseLRPAuctionWinner(filteredZones, lrpAuction)
 	if err != nil {
 		s.logger.Error("brain-lrp-auction-failed", err, lager.Data{"lrp-guid": lrpAuction.Identifier()})
 		return nil, err
@@ -234,7 +240,20 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 
 	s.logger.Info("Task-info",  lager.Data{"taskAuction": taskAuction}, lager.Data{"lrp-domain": taskAuction.Domain})
 
-	winnerCell, err := s.brains["default"].ChooseTaskAuctionWinner(s.zones, taskAuction)
+	filteredZones := []Zone{}
+
+	for _, zone := range s.zones {
+		cells := zone.FilterCells(taskAuction.RootFs)
+		if len(cells) > 0 {
+			filteredZones = append(filteredZones, Zone(cells))
+		}
+	}
+
+	if len(filteredZones) == 0 {
+		return nil, auctiontypes.ErrorCellMismatch
+	}
+
+	winnerCell, err := s.brains["default"].ChooseTaskAuctionWinner(filteredZones, taskAuction)
 	if err != nil {
 		s.logger.Error("brain-task-auction-failed", err, lager.Data{"task-guid": taskAuction.Identifier()})
 		return nil, err

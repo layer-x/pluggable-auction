@@ -68,7 +68,7 @@ var _ = Describe("Auction", func() {
 		runnerDelegate.SetCellLimit(numCells)
 		runner.ScheduleLRPsForAuctions(lrpStartAuctions)
 
-		Eventually(runnerDelegate.ResultSize, time.Minute, 100*time.Millisecond).Should(Equal(len(lrpStartAuctions)))
+		Eventually(runnerDelegate.ResultSize, 1 * time.Minute, 100*time.Millisecond).Should(Equal(len(lrpStartAuctions)))
 	}
 
 	runAndReportStartAuction := func(lrpStartAuctions []auctioneer.LRPStartRequest, numCells int, i int, j int) *visualization.Report {

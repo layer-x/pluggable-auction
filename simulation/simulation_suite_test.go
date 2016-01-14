@@ -30,7 +30,6 @@ import (
 
 	"testing"
 	"time"
-	"github.com/codegangsta/martini"
 	"strings"
 )
 
@@ -85,8 +84,8 @@ var defaultBrain auctionrunner.Brain
 var ListenForBrain = func() {
 	fmt.Printf("\nLISTENING FOR A DEFAULT BRAIN\n")
 	defaultBrainChan := make(chan auctionrunner.Brain)
-	m := martini.Classic()
-	m.Post("/Start", func(req *http.Request) {
+	m := http.NewServeMux()
+	m.HandleFunc("/Start", func(w http.ResponseWriter, req *http.Request) {
 		data, err := ioutil.ReadAll(req.Body)
 		if req.Body != nil {
 			defer req.Body.Close()
@@ -118,9 +117,10 @@ var ListenForBrain = func() {
 			brains[tag] = newBrain
 		}
 	})
-	go m.Run()
+	go http.ListenAndServe(":3000", m)
 	defaultBrain = <-defaultBrainChan
 	brains["default"] = defaultBrain
+//	brains["default"] = auctionrunner.NewFakeBrain(logger) //<- uncomment to use the classic brain
 }
 
 var _ = BeforeSuite(func() {

@@ -16,13 +16,9 @@ func NewFakeBrain(logger lager.Logger) *fakeBrain {
 	}
 }
 
-func (b *fakeBrain) ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *auctiontypes.LRPAuction) (*Cell, error) {
+func (b *fakeBrain) ChooseLRPAuctionWinner(filteredZones []lrpByZone, lrpAuction *auctiontypes.LRPAuction) (*Cell, error) {
 	var winnerCell *Cell
 	winnerScore := 1e20
-
-	zones := accumulateZonesByInstances(zoneMap, lrpAuction.ProcessGuid)
-
-	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
 
 	if len(filteredZones) == 0 {
 		return nil, auctiontypes.ErrorCellMismatch
@@ -60,18 +56,9 @@ func (b *fakeBrain) ChooseLRPAuctionWinner(zoneMap map[string]Zone, lrpAuction *
 	return winnerCell, nil
 }
 
-func (b *fakeBrain) ChooseTaskAuctionWinner(zoneMap map[string]Zone, taskAuction *auctiontypes.TaskAuction) (*Cell, error) {
+func (b *fakeBrain) ChooseTaskAuctionWinner(filteredZones []Zone, taskAuction *auctiontypes.TaskAuction) (*Cell, error) {
 	var winnerCell *Cell
 	winnerScore := 1e20
-
-	filteredZones := []Zone{}
-
-	for _, zone := range zoneMap {
-		cells := zone.FilterCells(taskAuction.RootFs)
-		if len(cells) > 0 {
-			filteredZones = append(filteredZones, Zone(cells))
-		}
-	}
 
 	if len(filteredZones) == 0 {
 		return nil, auctiontypes.ErrorCellMismatch

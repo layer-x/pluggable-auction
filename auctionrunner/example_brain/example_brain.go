@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"encoding/json"
 	"github.com/cloudfoundry-incubator/auction/auctionrunner"
-	"github.com/cloudfoundry-incubator/rep"
 )
 
 func main(){
@@ -30,7 +29,7 @@ func main(){
 			return
 		}
 		for _, serializableCellState := range auctionLRPRequest.SerializableCellStates {
-			if err = resourceMatch(serializableCellState, auctionLRPRequest.LRP.Resource); err != nil {
+			if err = serializableCellState.ResourceMatch(auctionLRPRequest.LRP.Resource); err != nil {
 				continue
 			}
 			data, err = json.Marshal(serializableCellState)
@@ -62,7 +61,7 @@ func main(){
 			return
 		}
 		for _, serializableCellState := range auctionTaskRequest.SerializableCellStates {
-			if err = resourceMatch(serializableCellState, auctionTaskRequest.Task.Resource); err != nil {
+			if err = serializableCellState.ResourceMatch(auctionTaskRequest.Task.Resource); err != nil {
 				continue
 			}
 			data, err = json.Marshal(serializableCellState)
@@ -77,18 +76,4 @@ func main(){
 		res.WriteHeader(http.StatusInternalServerError) //resource not found? ayy lmao
 	})
 	m.RunOnAddr(port)
-}
-
-
-func resourceMatch(c *auctionrunner.SerializableCellState, res rep.Resource) error {
-	switch {
-	case c.AvailableResources.MemoryMB < res.MemoryMB:
-		return rep.ErrorInsufficientResources
-	case c.AvailableResources.DiskMB < res.DiskMB:
-		return rep.ErrorInsufficientResources
-	case c.AvailableResources.Containers < 1:
-		return rep.ErrorInsufficientResources
-	default:
-		return nil
-	}
 }
