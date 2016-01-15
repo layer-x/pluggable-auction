@@ -9,7 +9,10 @@ import (
 	"github.com/cloudfoundry-incubator/rep"
 
 	"github.com/pivotal-golang/clock"
+	"strings"
 )
+
+const DIEGO_BRAIN_TAG = "DIEGO_BRAIN_TAG"
 
 type Batch struct {
 	lrpAuctions  []auctiontypes.LRPAuction
@@ -34,7 +37,13 @@ func (b *Batch) AddLRPStarts(starts []auctioneer.LRPStartRequest) {
 	for i := range starts {
 		start := &starts[i]
 		for _, index := range start.Indices {
-			lrpKey := models.NewActualLRPKey(start.ProcessGuid, int32(index), start.Domain)
+			var tags []string
+			for _, envVar := range start.EnvironmentVariables {
+				if envVar.Name == DIEGO_BRAIN_TAG {
+					tags = strings.Split(envVar.Value, ",")
+				}
+			}
+			lrpKey := models.NewActualLRPKey(start.ProcessGuid, int32(index), start.Domain, tags...)
 			auction := auctiontypes.NewLRPAuction(rep.NewLRP(lrpKey, start.Resource), now)
 			auctions = append(auctions, auction)
 		}

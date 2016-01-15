@@ -32,7 +32,9 @@ var _ = Describe("Auction", func() {
 	}
 
 	newLRPStartAuction := func(processGuid string, index int, memoryMB int32) auctioneer.LRPStartRequest {
-		return auctioneer.NewLRPStartRequest(processGuid, "domain", []int{index}, rep.NewResource(memoryMB, 1, linuxRootFSURL))
+		emptyEnvironmentVariables := []*models.EnvironmentVariable{}
+		emptyEnvironmentVariables = append(emptyEnvironmentVariables, &models.EnvironmentVariable{Name: "DIEGO_BRAIN_TAG", Value: "test-brain"})
+		return auctioneer.NewLRPStartRequest(processGuid, "domain", []int{index}, rep.NewResource(memoryMB, 1, linuxRootFSURL), emptyEnvironmentVariables)
 	}
 
 	generateUniqueLRPStartAuctions := func(numInstances int, memoryMB int32) []auctioneer.LRPStartRequest {

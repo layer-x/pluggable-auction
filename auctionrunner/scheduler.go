@@ -10,7 +10,6 @@ import (
 	"github.com/cloudfoundry/gunk/workpool"
 	"github.com/pivotal-golang/clock"
 	"github.com/pivotal-golang/lager"
-	"strings"
 )
 
 type Zone []*Cell
@@ -215,7 +214,7 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 	filteredZones := filterZonesByRootFS(zones, lrpAuction.RootFs)
 	filteredZones = SortZonesByInstances(filteredZones)
 
-	tags := strings.Split(lrpAuction.LRP.ActualLRPKey.ProcessGuid, ",") //get tags off of LRP id
+	tags := lrpAuction.LRP.Tags
 
 	//send known zones to ui
 	if uiBrain, ok := s.brains["ui"]; ok {
@@ -277,13 +276,11 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 		return nil, auctiontypes.ErrorCellMismatch
 	}
 
-
-
 	//send known zones to ui
 	if uiBrain, ok := s.brains["ui"]; ok {
 		uiBrain.ChooseTaskAuctionWinner(filteredZones, taskAuction)
 	}
-	tags := strings.Split(taskAuction.Task.TaskGuid, ",") //get tags off of LRP id
+	tags := taskAuction.Tags
 	var brainFound bool
 	for _, tag := range tags {
 		brain, ok := s.brains[tag]

@@ -584,7 +584,7 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
 			taskMem := task.MemoryMB
 			if len(taskId) > 4 {
 				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
-	`, taskId, taskId[len(taskId) - 4:], taskDisk, taskMem)
+	`, taskId, taskId[:len(taskId) - 4], taskDisk, taskMem)
 			} else {
 				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
 	`, taskId, taskId, taskDisk, taskMem)
@@ -596,7 +596,7 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
 			lrpMem := lrp.MemoryMB
 			if len(lrpId) > 4 {
 				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
-	`, lrpId, lrpId[len(lrpId) - 4:], lrpDisk, lrpMem)
+	`, lrpId, lrpId[:len(lrpId) - 4], lrpDisk, lrpMem)
 			} else {
 				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)

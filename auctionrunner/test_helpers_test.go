@@ -11,7 +11,8 @@ import (
 )
 
 func BuildLRPStartRequest(processGuid, domain string, indices []int, rootFS string, memoryMB, diskMB int32) auctioneer.LRPStartRequest {
-	return auctioneer.NewLRPStartRequest(processGuid, domain, indices, rep.NewResource(memoryMB, diskMB, rootFS))
+	emptyEnvironmentVariables := []*models.EnvironmentVariable{}
+	return auctioneer.NewLRPStartRequest(processGuid, domain, indices, rep.NewResource(memoryMB, diskMB, rootFS), emptyEnvironmentVariables)
 }
 
 func BuildTaskStartRequest(taskGuid, domain, rootFS string, memoryMB, diskMB int32) auctioneer.TaskStartRequest {
