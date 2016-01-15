@@ -7,6 +7,7 @@ import (
 	"github.com/cloudfoundry-incubator/auctioneer"
 	"github.com/cloudfoundry-incubator/rep"
 	"github.com/tedsuo/ifrit"
+	"fmt"
 )
 
 // Auction Runners
@@ -66,6 +67,7 @@ type LRPAuction struct {
 }
 
 func NewLRPAuction(lrp rep.LRP, now time.Time) LRPAuction {
+	fmt.Printf("I GOT SOME LRP-TAGS FOR YA, SON: %v", lrp.Tags)
 	return LRPAuction{
 		lrp,
 		NewAuctionRecord(now),

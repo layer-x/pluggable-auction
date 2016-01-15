@@ -207,7 +207,7 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 	var winnerCell *Cell
 	var err error
 
-	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
+	s.logger.Info("LRP-info", lager.Data{"lrpAuction": lrpAuction, "TAGS-FOR-BRAIN": lrpAuction.Tags}, lager.Data{"lrp-domain": lrpAuction.ActualLRPKey.Domain})
 
 	zones := AccumulateZonesByInstances(s.zones, lrpAuction.ProcessGuid)
 
@@ -261,7 +261,7 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 	var winnerCell *Cell
 	var err error
 
-	s.logger.Info("Task-info",  lager.Data{"taskAuction": taskAuction}, lager.Data{"lrp-domain": taskAuction.Domain})
+	s.logger.Info("Task-info",  lager.Data{"taskAuction": taskAuction, "TAGS-FOR-BRAIN": taskAuction.Tags}, lager.Data{"lrp-domain": taskAuction.Domain})
 
 	filteredZones := []Zone{}
 

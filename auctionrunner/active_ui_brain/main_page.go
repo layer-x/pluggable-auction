@@ -3,6 +3,7 @@ import (
 	"github.com/cloudfoundry-incubator/auction/auctionrunner"
 	"fmt"
 	"sort"
+	"github.com/cloudfoundry-incubator/rep"
 )
 
 type ByGuid []*auctionrunner.SerializableCellState
@@ -11,7 +12,7 @@ func (a ByGuid) Len() int           { return len(a) }
 func (a ByGuid) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByGuid) Less(i, j int) bool { return a[i].Guid < a[j].Guid }
 
-func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
+func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auctionrunner.SerializableCellState) string {
 
 	sortedCells := []*auctionrunner.SerializableCellState{}
 	for _, cell := range cells {
@@ -20,7 +21,8 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
 
 	 sort.Sort(ByGuid(sortedCells))
 
-	pageStr := fmt.Sprintf(`<!DOCTYPE html>
+	pageStr := fmt.Sprintf(`
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="refresh" content="5">
@@ -569,8 +571,46 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
   	<div id="topBar">
   		<img src="http://i.imgur.com/XHvg4kz.png">
   	</div>
-  	 <div id="dhtmlgoodies_mainContainer">
+  	<div id="dhtmlgoodies_listOfItems">
+  		<div>
+  			<p>Pending</p>
+  		<ul id="allItems">`)
+	if pendingTask != nil {
+		taskId := pendingTask.TaskGuid
+		taskDisk := pendingTask.DiskMB
+		taskMem := pendingTask.MemoryMB
+		if len(taskId) > 4 {
+			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk: %v<br>mem: %v</li>
+	`, taskId, taskId[len(taskId) - 4:], taskDisk, taskMem)
+		} else {
+			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus: %v<br>mem: %v</li>
+	`, taskId, taskId, taskDisk, taskMem)
+		}
+		pageStr += fmt.Sprintf(`
+  		</ul>
+  		</div>
+  	</div>
+  	<div id="dhtmlgoodies_mainContainer">
   		<!-- ONE <UL> for each "room" -->`)
+	}
+	if pendingLRP != nil {
+		lrpId := pendingLRP.ProcessGuid
+		lrpDisk := pendingLRP.DiskMB
+		lrpMem := pendingLRP.MemoryMB
+		if len(lrpId) > 4 {
+			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk: %v<br>mem: %v</li>
+	`, lrpId, lrpId[len(lrpId) - 4:], lrpDisk, lrpMem)
+		} else {
+			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus: %v<br>mem: %v</li>
+	`, lrpId, lrpId, lrpDisk, lrpMem)
+		}
+		pageStr += fmt.Sprintf(`
+  		</ul>
+  		</div>
+  	</div>
+  	<div id="dhtmlgoodies_mainContainer">
+  		<!-- ONE <UL> for each "room" -->`)
+	}
 	for _, cell := range sortedCells {
 		cellId := cell.Guid
 		pageStr += fmt.Sprintf(`
