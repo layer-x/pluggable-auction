@@ -617,7 +617,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
   		<div>
   			<p>Cell %s<br>Containers:%v<br>Mem:%v<br>Disk:%v</p>
   			<ul id="%s">
-		`, cellId[len(cellId) - 4:], cell.AvailableResources.Containers, cell.AvailableResources.MemoryMB, cell.AvailableResources.DiskMB)
+		`, cellId[len(cellId) - 4:], cell.AvailableResources.Containers, cell.AvailableResources.MemoryMB, cell.AvailableResources.DiskMB, cellId)
 		for _, task := range cell.Tasks {
 			taskId := task.TaskGuid
 			taskDisk := task.DiskMB

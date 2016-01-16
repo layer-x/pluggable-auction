@@ -6,14 +6,17 @@ import (
 	"fmt"
 	"encoding/json"
 	"github.com/cloudfoundry-incubator/auction/auctionrunner"
+	"github.com/cloudfoundry-incubator/rep"
 )
 
 var cells map[string]*auctionrunner.SerializableCellState
-func main(){
+func main() {
 	cells = make(map[string]*auctionrunner.SerializableCellState)
-
-	port := ":3333"
+	chosenCellIdChan := make(chan string)
+	port := ":4444"
 	m := martini.Classic()
+	var pendingTask *rep.Task
+	var pendingLRP *rep.LRP
 	m.Post("/AuctionLRP", func(req *http.Request, res http.ResponseWriter) {
 		data, err := ioutil.ReadAll(req.Body)
 		if req.Body != nil {
@@ -34,9 +37,21 @@ func main(){
 		for _, serializableCellState := range auctionLRPRequest.SerializableCellStates {
 			cells[serializableCellState.Guid] = serializableCellState
 		}
+		pendingLRP = &auctionLRPRequest.LRP
 		var winnerCell *auctionrunner.SerializableCellState
-
-		res.WriteHeader(http.StatusAccepted) //resource not found? ayy lmao
+		chosenCellId := <-chosenCellIdChan
+		winnerCell = cells[chosenCellId]
+		if winnerCell != nil {
+			data, err = json.Marshal(winnerCell)
+			if err != nil {
+				fmt.Printf("\n\nSomething really bad happened! Couldnt read marshal the winning Cell to json!: %v\n\n", string(data), err)
+				res.WriteHeader(http.StatusExpectationFailed)
+				return
+			}
+			res.Write(data)
+		} else {
+			res.WriteHeader(http.StatusInternalServerError) //resource not found? ayy lmao
+		}
 	})
 	m.Post("/AuctionTask", func(req *http.Request, res http.ResponseWriter) {
 		data, err := ioutil.ReadAll(req.Body)
@@ -58,10 +73,59 @@ func main(){
 		for _, serializableCellState := range auctionTaskRequest.SerializableCellStates {
 			cells[serializableCellState.Guid] = serializableCellState
 		}
-		res.WriteHeader(http.StatusInternalServerError) //resource not found? ayy lmao
+		pendingTask = &auctionTaskRequest.Task
+		var winnerCell *auctionrunner.SerializableCellState
+		chosenCellId := <-chosenCellIdChan
+		fmt.Printf("\n%v\n", cells)
+		winnerCell = cells[chosenCellId]
+		if winnerCell != nil {
+			data, err = json.Marshal(winnerCell)
+			if err != nil {
+				fmt.Printf("\n\nSomething really bad happened! Couldnt read marshal the winning Cell to json!: %v\n\n", string(data), err)
+				res.WriteHeader(http.StatusExpectationFailed)
+				return
+			}
+			res.Write(data)
+		} else {
+			res.WriteHeader(http.StatusInternalServerError) //resource not found? ayy lmao
+		}
 	})
-	m.Get("", func() string {
-		return mainPage(cells)
+	m.Get("/assignment", func(res http.ResponseWriter, req *http.Request) string {
+		query := req.URL.Query()
+		fmt.Println("reached1")
+		fmt.Printf("\nquery: %v\n", query)
+		cellId := query.Get("slave_id")
+		taskOrLrpId := query.Get("task_id")
+		if pendingLRP != nil && pendingLRP.ProcessGuid == taskOrLrpId {
+			fmt.Println("reached2")
+			pendingLRP = nil
+		} else if pendingTask != nil && pendingTask.TaskGuid == taskOrLrpId {
+			fmt.Println("reached3")
+			pendingTask = nil
+		} else {
+			fmt.Println("reached4")
+			panic("THE ID WAS WRONG!?!??????????????? " + taskOrLrpId + " should have been either " + pendingLRP.ProcessGuid + " or " + pendingTask.TaskGuid)
+		}
+		fmt.Println("reached5: cellid: " + cellId)
+		chosenCellIdChan <- cellId
+		return Redirect(fmt.Sprintf("\nquery: %v\n", query))
+	})
+	m.Get("/brain", func() string {
+		return mainPage(pendingLRP, pendingTask, cells)
 	})
 	m.RunOnAddr(port)
+}
+
+func Redirect(withResult string) string {
+	return fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+   <!-- HTML meta refresh URL redirection -->
+   <meta http-equiv="refresh"
+   content="1; url=/brain">
+</head>
+<body>
+   <p>%s</p>
+</body>
+</html>`, withResult)
 }
