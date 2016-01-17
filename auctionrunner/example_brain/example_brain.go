@@ -9,7 +9,7 @@ import (
 )
 
 func main(){
-	port := ":666"
+	port := ":7777"
 	m := martini.Classic()
 	m.Post("/AuctionLRP", func(req *http.Request, res http.ResponseWriter) {
 		data, err := ioutil.ReadAll(req.Body)
@@ -28,6 +28,10 @@ func main(){
 			res.WriteHeader(http.StatusConflict)
 			return
 		}
+		lrpJson, _ := json.Marshal(auctionLRPRequest.LRP)
+		fmt.Printf("\nLRP_JSON:\n%s\n", string(lrpJson))
+		cellJson, _ := json.Marshal(auctionLRPRequest.SerializableCellStates[0])
+		fmt.Printf("\nONE_CELL_JSON:\n%s\n", string(cellJson))
 		for _, serializableCellState := range auctionLRPRequest.SerializableCellStates {
 			if err = serializableCellState.ResourceMatch(auctionLRPRequest.LRP.Resource); err != nil {
 				continue
@@ -60,6 +64,8 @@ func main(){
 			res.WriteHeader(http.StatusConflict)
 			return
 		}
+		taskJson, _ := json.Marshal(auctionTaskRequest.Task)
+		fmt.Printf("\nTASK_JSON:\n%s\n", string(taskJson))
 		for _, serializableCellState := range auctionTaskRequest.SerializableCellStates {
 			if err = serializableCellState.ResourceMatch(auctionTaskRequest.Task.Resource); err != nil {
 				continue
