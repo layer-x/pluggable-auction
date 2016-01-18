@@ -149,7 +149,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 
 	#dhtmlgoodies_mainContainer ul{	/* Small box in right column ,i.e <ul> */
 		width:152px;
-		height:80px;
+		height:130px;
 		border:0px;
 		margin-bottom:0px;
 		overflow:hidden;
@@ -159,7 +159,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 	#dragContent{	/* Drag container */
 		position:absolute;
 		width:150px;
-		height:20px;
+		height:40px;
 		display:none;
 		margin:0px;
 		padding:0px;
@@ -222,7 +222,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 	var boxSizeArray = [4,4,4,3,7];	// Array indicating how many items there is rooom for in the right column ULs
 
 
-	var verticalSpaceBetweenListItems = 3;	// Pixels space between one <li> and next
+	var verticalSpaceBetweenListItems = 20;	// Pixels space between one <li> and next
 											// Same value or higher as margin bottom in CSS for #dhtmlgoodies_dragDropContainer ul li,#dragContent li
 
 
@@ -532,12 +532,12 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 		var uls = mainContainer.getElementsByTagName('UL');
 		itemHeight = itemHeight + verticalSpaceBetweenListItems;
 		for(var no=0;no<uls.length;no++){
-			uls[no].style.height = itemHeight * (2.1 + uls[no].getElementsByTagName('LI').length) + 'px';
+			uls[no].style.height = itemHeight * (3.1 + uls[no].getElementsByTagName('LI').length) + 'px';
 		}
 
 		var leftContainer = document.getElementById('dhtmlgoodies_listOfItems');
 		var itemBox = leftContainer.getElementsByTagName('UL')[0];
-		itemBox.style.height = itemHeight * (2.1 + itemBox.getElementsByTagName('LI').length) + 'px';
+		itemBox.style.height = itemHeight * (3.1 + itemBox.getElementsByTagName('LI').length) + 'px';
 
 		document.documentElement.onmousemove = moveDragContent;	// Mouse move event - moving draggable div
 		document.documentElement.onmouseup = dragDropEnd;	// Mouse move event - moving draggable div
@@ -571,6 +571,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
   	<div id="topBar">
   		<img src="http://i.imgur.com/XHvg4kz.png">
   	</div>
+
   	<div id="dhtmlgoodies_listOfItems">
   		<div>
   			<p>Pending</p>
@@ -581,17 +582,11 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 		taskMem := pendingTask.MemoryMB
 		if len(taskId) > 4 {
 			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk: %v<br>mem: %v</li>
-	`, taskId, taskId[len(taskId) - 4:], taskDisk, taskMem)
+	`, taskId, taskId[0:4], taskDisk, taskMem)
 		} else {
 			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus: %v<br>mem: %v</li>
 	`, taskId, taskId, taskDisk, taskMem)
 		}
-		pageStr += fmt.Sprintf(`
-  		</ul>
-  		</div>
-  	</div>
-  	<div id="dhtmlgoodies_mainContainer">
-  		<!-- ONE <UL> for each "room" -->`)
 	}
 	if pendingLRP != nil {
 		lrpId := pendingLRP.ProcessGuid
@@ -599,18 +594,18 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 		lrpMem := pendingLRP.MemoryMB
 		if len(lrpId) > 4 {
 			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk: %v<br>mem: %v</li>
-	`, lrpId, lrpId[len(lrpId) - 4:], lrpDisk, lrpMem)
+	`, lrpId, lrpId[0:4], lrpDisk, lrpMem)
 		} else {
 			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus: %v<br>mem: %v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)
 		}
-		pageStr += fmt.Sprintf(`
+	}
+	pageStr += fmt.Sprintf(`
   		</ul>
   		</div>
   	</div>
   	<div id="dhtmlgoodies_mainContainer">
   		<!-- ONE <UL> for each "room" -->`)
-	}
 	for _, cell := range sortedCells {
 		cellId := cell.Guid
 		pageStr += fmt.Sprintf(`
@@ -624,7 +619,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			taskMem := task.MemoryMB
 			if len(taskId) > 4 {
 				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
-	`, taskId, taskId[:len(taskId) - 4], taskDisk, taskMem)
+	`, taskId, taskId[0:4], taskDisk, taskMem)
 			} else {
 				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
 	`, taskId, taskId, taskDisk, taskMem)
@@ -636,7 +631,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			lrpMem := lrp.MemoryMB
 			if len(lrpId) > 4 {
 				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
-	`, lrpId, lrpId[:len(lrpId) - 4], lrpDisk, lrpMem)
+	`, lrpId, lrpId[0:4], lrpDisk, lrpMem)
 			} else {
 				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)
