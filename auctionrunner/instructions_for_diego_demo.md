@@ -151,3 +151,41 @@ applications:
   - `cf push --no-start`
   - `cf enable_diego SOME_OTHER_NAME`
   - `cf start SOME_OTHER_NAME`
+
+###Backup Environment:
+
+*1 - In case the environment fails, there is an identical backup environment running on AWS.*
+
+*2 - To use it:*
+
+  a - replace all instances of the ip `54.85.194.198` with `54.183.31.218` (for `ssh ...`, `bosh target ...` and `cf login ...`)
+
+  b - replace the bosh-lite private ip `172.31.12.164` with `172.31.6.212` (for commands that assign Brains to diego)
+
+  c - and replace the ssh key in `bosh.pem` with:
+
+```
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEAmT+wbEFqGmBglzFJlxid3Vk1zMsznuG3eb32RP6P65JQysh+w65AwYz6BiIx
+3hj8Y7P3TsznKCjUY/z8jXve3ydoAEh62rSD/BZNeyYCHmADQEwyNORQU/AplUPKdsqYoVXadwAB
+Pmd4HJ84KBxzMZWyFGtzqM0QhbUY0wuxqcy0SwRW8pIo6/BSHWBKKyEMWR/2f9SG6j2g8PR0/iwU
+9QXqrGSQVKjR0wDP7zwSGTrdA08I7a/KmbgQyOWLOz8xL5jxwJ7pXPjA4oyfagjAC2SN/9FFm3LX
+sy+hS6f8f3zV+fEy29k8o6mH3WGaScrmlXGShnhgcygrt0mwHAl8UwIDAQABAoIBAQCPIN3MbdgE
+JIlyDFV36kTezAgkapCezp+G87WDwOF4GiKdEl7ase/HFb0aZ2t9zIZFNHtBPLyUVHXxoQHbvpps
+fyhyQz+C7l/q3IWnA9ustO20arXlkmu3ybF8uGDrS9L7s+yjgfynZQnYaZiQVen8oJw+2BCg0k2h
+I3+49M4NEC7qxguIorTplcJI7dXpXjOy0MZ4D0QUTOBAKEzx99Gx4dDB0vDI9kznJXx0kXlQw1KU
+4gD/KkIIrWDQXOmfNme4s1pn6e0cAaCfEic69MMDZ/NvG0AEvvZZjNPsExoltlqPb62Gh/CNoAlj
+XAFQM60Li+uO4rqkSqPPOTSNNjohAoGBAOKPRF5LGm6uYFi/svBhpl8naxy71WDSKGw0bF8gv6ML
+xudTuN62R/ggEq8vciNJdhpPlOA4ewFTJXIAJECYe4T5XntvmfSVXd/3I3A223+5DV1QEWKh71wP
+aGyyh7wNV7VWReNSvq0zv6giQqALKanPHwhjF8ALcexfixnDqPKjAoGBAK0pqc2oBd9FKLP5FgDR
+fxJrpsi5GkeGlxVsOSJMTdGXyrxY/FHFbc/rLGFbyK/eqvQpg2/mWSWpKZtRbaopPZxQafx6ZgeF
+cvNrZ9HU7TXqR1XdEj7peWYZKiI/CHHUAbfd+7eiaNIjx26Q+kL89T1dDUDwVIVB052ipZkzNpqR
+AoGBAIv7s2WDiABtE7CiOYCXBUHzzBXD5PJex4Ub2v3n8SBfzXTu4OISxGMGBiVh7mbpI+Tb2QO1
+QiMuaYuHlN6omGEv5vXjnb9mbstMGwRhkLvY7e4C48sKfSdnicDnikBiChhMBwCPBqtjtv6+tGXI
+n+SAyg7XkzwgljJTUlIH96J7AoGBAKoJeWYrEekWXkur0kFndmI+N35u1TFbJkyxAsF9MAUaCsg8
+kTgyqAw9IE1R9ZVND43GnfxpsyxaGjMcGJW4/XjbNdfo0PudvSzuUPopHe2NahMUjHAej0kEeO07
+/CzaQ/2rCxxdbJS88X7O+hCBmMdy8irMVBKuewAV0IrJUVshAoGAM1Ws17TBurocG8+jNHjuCpJw
+pGvwvmJpwojl6D4+2a2yoP9l2zFQRxbZroFM7rFp/7qwyVxIob5oWkJh/NhEN5iW3UqwhZRyFxq1
+UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
+-----END RSA PRIVATE KEY-----
+```
