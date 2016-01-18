@@ -85,11 +85,13 @@ x+l631OqbmXcdDMYlQfCZrVg66LwpFxqbAekJxUgjH6yJ8FsklDJMQCqshNBWrW6TtFLzDyFz8wz
 J1UJMMkLneKKbXYGV7Zy1uPCtcBIcfldtME+YCRtuOLNJhSVWYubRndX4uDeOcPCJ7ij
 -----END RSA PRIVATE KEY-----
 ```
-    - the `cell_z1` vms are the cells; these are not modified
-    - the `brain_z1` vm is where the modified auctioneer lives. when we register brains to the auctioneer, we need send the `cURL -X POST` to this ip `10.244.16.134`
+
+  - the `cell_z1` vms are the cells; these are not modified
+  - the `brain_z1` vm is where the modified auctioneer lives. when we register brains to the auctioneer, we need send the `cURL -X POST` to this ip `10.244.16.134`
+
 * run the command `chmod 400 bosh.pem`
 
-* `ssh -i bosh.pem 54.85.194.198`
+* `ssh -i bosh.pem ubuntu@54.85.194.198`
 
 ***2 - Run a brain: (from ssh session)***
 
@@ -120,6 +122,10 @@ J1UJMMkLneKKbXYGV7Zy1uPCtcBIcfldtME+YCRtuOLNJhSVWYubRndX4uDeOcPCJ7ij
   - run `BRAIN_NAME="fenzo_brain" BRAIN_PORT=5555 BRAIN_TAGS="fenzo" curl -X curl -X POST 10.244.16.134:3000/Start -d '{"name":"${BRAIN_NAME}","url":"http://172.31.12.164:${BRAIN_PORT}","tags":"${BRAIN_TAGS}"}'`
 
 ***3. Push an App with CloudFoundry (from your laptop)***
+- Install the cf cli if you don't already have it:
+  - `brew install cf-cli`
+- Log in to the cf instance running on our bosh-lite:
+  -  `cf login -a api.54.85.194.198.xip.io  -u admin -p admin --skip-ssl-validation`
 - Pull the example_cf_apps to your laptop
 
   `git clone https://github.com/EMC-CMD/cf-example-apps.git`
