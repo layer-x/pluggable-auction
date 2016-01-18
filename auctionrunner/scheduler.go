@@ -216,11 +216,6 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 	tags := lrpAuction.LRP.Tags
 
-	//send known zones to ui
-	if uiBrain, ok := s.brains["ui"]; ok {
-		uiBrain.ChooseLRPAuctionWinner(filteredZones, lrpAuction)
-	}
-
 	var brainFound bool
 	for _, tag := range tags {
 		brain, ok := s.brains[tag]
@@ -254,6 +249,12 @@ func (s *Scheduler) scheduleLRPAuction(lrpAuction *auctiontypes.LRPAuction) (*au
 
 	winningAuction := lrpAuction.Copy()
 	winningAuction.Winner = winnerCell.Guid
+
+	//send known zones to ui
+	if uiBrain, ok := s.brains["ui"]; ok {
+		uiBrain.ChooseLRPAuctionWinner(filteredZones, lrpAuction)
+	}
+
 	return &winningAuction, nil
 }
 
@@ -276,10 +277,6 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 		return nil, auctiontypes.ErrorCellMismatch
 	}
 
-	//send known zones to ui
-	if uiBrain, ok := s.brains["ui"]; ok {
-		uiBrain.ChooseTaskAuctionWinner(filteredZones, taskAuction)
-	}
 	tags := taskAuction.Tags
 	var brainFound bool
 	for _, tag := range tags {
@@ -311,6 +308,11 @@ func (s *Scheduler) scheduleTaskAuction(taskAuction *auctiontypes.TaskAuction) (
 	if err != nil {
 		s.logger.Error("task-failed-to-reserve-cell", err, lager.Data{"cell-guid": winnerCell.Guid, "task-guid": taskAuction.Identifier()})
 		return nil, err
+	}
+
+	//send known zones to ui
+	if uiBrain, ok := s.brains["ui"]; ok {
+		uiBrain.ChooseTaskAuctionWinner(filteredZones, taskAuction)
 	}
 
 	winningAuction := taskAuction.Copy()
