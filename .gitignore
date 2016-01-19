@@ -6,3 +6,6 @@
 *.json
 *.svg
 *.png
+auctionrunner/original_diego_brain/original_diego_brain
+auctionrunner/fenzo_brain/target/
+auctionrunner/ui_brain/ui_brain
