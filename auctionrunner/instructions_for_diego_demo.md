@@ -5,7 +5,7 @@ instructions for running diego w/ multi-brain:
 - Show running "VMs" (really warden containers running inside of bosh-lite)
 - install BOSH-CLI:
  - `gem install bosh_cli`
-- run `bosh target 54.183.237.92`
+- run `bosh target 54.67.93.53`
     -  username: `admin`, password: `admin`
 -  run `bosh vms`
     * you will see output like the following:
@@ -52,7 +52,7 @@ VMs total: 8
 - see running apps in cf: `cf apps`
 - delete running app in cf: `cf delete <app_name>`
 - scale running app in cf: `cf scale <app_name> -i <number_of_instances>`
-- view a running app through your web browser: go to http://APP_NAME.54.183.237.92.xip.io/ (i think this is a really good idea)
+- view a running app through your web browser: go to http://APP_NAME.54.67.93.53.xip.io/ (i think this is a really good idea)
 
 ***1 - SSH to Bosh-Lite VM (running on Amazon)***
 
@@ -91,7 +91,7 @@ a0kHkTGyH/yLnpVHrb19ttlWAgPQT3ZKUQgw8vj2WYTAUwWJTBpRtdiLNXJKDpjvosPGspAsYjGj
 
 * run the command `chmod 400 bosh.pem`
 
-* `ssh -i bosh.pem ubuntu@54.183.237.92`
+* `ssh -i bosh.pem ubuntu@54.67.93.53`
 
 ***2 - Run a brain: (from ssh session)***
 
@@ -110,31 +110,31 @@ a0kHkTGyH/yLnpVHrb19ttlWAgPQT3ZKUQgw8vj2WYTAUwWJTBpRtdiLNXJKDpjvosPGspAsYjGj
 
     ```
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"passive_ui_brain","url":"http://172.31.27.58:3333","tags":"ui"}'
+      -d '{"name":"passive_ui_brain","url":"http://172.31.29.198:3333","tags":"ui"}'
     ```
 
     - this sends a POST request with some json telling the auctioneer the following information about the brain:
         - _name_ = "passive_ui_brain"
-        - _url_ = http://172.31.27.58:3333
+        - _url_ = http://172.31.29.198:3333
         - _tags_ = ["ui"]
-   - view the passive ui at http://54.183.237.92:3333
+   - view the passive ui at http://54.67.93.53:3333
 
 - Register the Active UI Brain with the Auctioneer, using the tag "default":
   - run:
 
     ```
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"active_ui_brain","url":"http://172.31.27.58:4444","tags":"default"}'
+      -d '{"name":"active_ui_brain","url":"http://172.31.29.198:4444","tags":"default"}'
     ```
 
-  - view the active ui at http://54.183.237.92:4444
+  - view the active ui at http://54.67.93.53:4444
 
 - Register the Diego Brain with the Auctioneer, using the tags "default", and "diego":
     - run:
 
     ```
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"diego_brain","url":"http://172.31.27.58:6666","tags":"default,diego"}'
+      -d '{"name":"diego_brain","url":"http://172.31.29.198:6666","tags":"default,diego"}'
     ```
 
 - Register the Fenzo Brain with the Auctioneer, using the tag "fenzo":
@@ -142,14 +142,14 @@ a0kHkTGyH/yLnpVHrb19ttlWAgPQT3ZKUQgw8vj2WYTAUwWJTBpRtdiLNXJKDpjvosPGspAsYjGj
 
     ```
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"fenzo_brain","url":"http://172.31.27.58:5555","tags":"fenzo"}'
+      -d '{"name":"fenzo_brain","url":"http://172.31.29.198:5555","tags":"fenzo"}'
       ```
 
 ***3. Push an App with CloudFoundry (from your laptop)***
 - Install the cf cli if you don't already have it:
   - `brew install cf-cli`
 - Log in to the cf instance running on our bosh-lite:
-  -  `cf login -a api.54.183.237.92.xip.io  -u admin -p admin --skip-ssl-validation`
+  -  `cf login -a api.54.67.93.53.xip.io  -u admin -p admin --skip-ssl-validation`
 - Pull the example_cf_apps to your laptop
 
   `git clone https://github.com/EMC-CMD/cf-example-apps.git`
@@ -182,9 +182,9 @@ applications:
 
 *2 - To use it:*
 
-  a - replace all instances of the ip `54.183.237.92` with `54.208.251.28` (for `ssh ...`, `bosh target ...` and `cf login ...`)
+  a - replace all instances of the ip `54.67.93.53` with `54.183.111.189` (for `ssh ...`, `bosh target ...` and `cf login ...`)
 
-  b - replace the bosh-lite private ip `172.31.27.58` with `172.31.5.101` (for commands that assign Brains to diego)
+  b - replace the bosh-lite private ip `172.31.29.198` with `172.31.5.101` (for commands that assign Brains to diego)
 
   c - and replace the ssh key in `bosh.pem` with:
 
