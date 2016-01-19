@@ -109,9 +109,8 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
     - run:
 
     ```
-    BRAIN_NAME="passive_ui_brain" BRAIN_PORT=3333 BRAIN_TAGS="ui" \
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"${BRAIN_NAME}","url":"http://172.31.6.212:${BRAIN_PORT}","tags":"${BRAIN_TAGS}"}'
+      -d '{"name":"passive_ui_brain","url":"http://172.31.6.212:3333","tags":"ui"}'
     ```
 
     - this sends a POST request with some json telling the auctioneer the following information about the brain:
@@ -124,9 +123,8 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
   - run:
 
     ```
-    BRAIN_NAME="active_ui_brain" BRAIN_PORT=4444 BRAIN_TAGS="default" \
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"${BRAIN_NAME}","url":"http://172.31.6.212:${BRAIN_PORT}","tags":"${BRAIN_TAGS}"}'
+      -d '{"name":"active_ui_brain","url":"http://172.31.6.212:4444","tags":"default"}'
     ```
 
   - view the active ui at http://54.183.31.218:4444
@@ -135,18 +133,16 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
     - run:
 
     ```
-    BRAIN_NAME="diego_brain" BRAIN_PORT=6666 BRAIN_TAGS="default,diego" \
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"${BRAIN_NAME}","url":"http://172.31.6.212:${BRAIN_PORT}","tags":"${BRAIN_TAGS}"}'
+      -d '{"name":"diego_brain","url":"http://172.31.6.212:6666","tags":"default,diego"}'
     ```
 
 - Register the Fenzo Brain with the Auctioneer, using the tag "fenzo":
   - run:
 
     ```
-    BRAIN_NAME="fenzo_brain" BRAIN_PORT=5555 BRAIN_TAGS="fenzo" \
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"${BRAIN_NAME}","url":"http://172.31.6.212:${BRAIN_PORT}","tags":"${BRAIN_TAGS}"}'
+      -d '{"name":"fenzo_brain","url":"http://172.31.6.212:5555","tags":"fenzo"}'
       ```
 
 ***3. Push an App with CloudFoundry (from your laptop)***
