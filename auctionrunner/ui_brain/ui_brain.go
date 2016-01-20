@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"github.com/cloudfoundry-incubator/auction/auctionrunner"
+	"github.com/cloudfoundry-incubator/rep"
 )
 
 var cells map[string]*auctionrunner.SerializableCellState
@@ -35,6 +36,7 @@ func main(){
 			cells[serializableCellState.Guid] = serializableCellState
 		}
 		res.WriteHeader(http.StatusAccepted) //resource not found? ayy lmao
+		removeTasks(cells)
 	})
 	m.Post("/AuctionTask", func(req *http.Request, res http.ResponseWriter) {
 		data, err := ioutil.ReadAll(req.Body)
@@ -62,4 +64,10 @@ func main(){
 		return mainPage(cells)
 	})
 	m.RunOnAddr(port)
+}
+
+func removeTasks(cells map[string]*auctionrunner.SerializableCellState) {
+	for _, cell := range cells {
+		cell.Tasks = []rep.Task{}
+	}
 }

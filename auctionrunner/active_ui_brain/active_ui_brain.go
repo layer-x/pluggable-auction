@@ -49,6 +49,7 @@ func main() {
 				return
 			}
 			res.Write(data)
+			removeTasks(cells)
 		} else {
 			res.WriteHeader(http.StatusInternalServerError) //resource not found? ayy lmao
 		}
@@ -98,9 +99,17 @@ func main() {
 		taskOrLrpId := query.Get("task_id")
 		if pendingLRP != nil && pendingLRP.ProcessGuid == taskOrLrpId {
 			fmt.Println("reached2")
+			chosenCell := cells[cellId]
+			if chosenCell != nil {
+				chosenCell.LRPs = append(chosenCell.LRPs, pendingLRP.Copy())
+			}
 			pendingLRP = nil
 		} else if pendingTask != nil && pendingTask.TaskGuid == taskOrLrpId {
 			fmt.Println("reached3")
+			chosenCell := cells[cellId]
+			if chosenCell != nil {
+				chosenCell.Tasks = append(chosenCell.Tasks, pendingTask.Copy())
+			}
 			pendingTask = nil
 		} else {
 			fmt.Println("reached4")
@@ -128,4 +137,10 @@ func Redirect(withResult string) string {
    <p>%s</p>
 </body>
 </html>`, withResult)
+}
+
+func removeTasks(cells map[string]*auctionrunner.SerializableCellState) {
+	for _, cell := range cells {
+		cell.Tasks = []rep.Task{}
+	}
 }

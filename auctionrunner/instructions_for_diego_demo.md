@@ -119,12 +119,12 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
         - _tags_ = ["ui"]
    - view the passive ui at http://54.183.111.189:3333
 
-- Register the Active UI Brain with the Auctioneer, using the tag "default":
+- Register the Active UI Brain with the Auctioneer, using the tag "active-ui":
   - run:
 
     ```
       curl -X curl -X POST 10.244.16.134:3000/Start \
-      -d '{"name":"active_ui_brain","url":"http://172.31.0.196:4444","tags":"default"}'
+      -d '{"name":"active_ui_brain","url":"http://172.31.0.196:4444","tags":"active-ui"}'
     ```
 
   - view the active ui at http://54.183.111.189:4444/brain
@@ -157,8 +157,8 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
   `cd example_cf_apps/exampleapp`
 
 - Push an app to the _default brain_:
-  - `cf push --no-start`
-  - `cf enable_diego exampleapp`
+  - `cf push --no-start -f manifest.yml`
+  - `cf enable-diego exampleapp`
   - `cf start exampleapp`
   - (optional) `cf scale exampleapp -i 3` (replace 3 with # of instances you want)
 
