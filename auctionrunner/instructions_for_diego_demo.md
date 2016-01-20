@@ -95,13 +95,13 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
 
 ***2 - Run a brain: (from ssh session)***
 
-- Run the Passive (observe-only) UI Brain: `~/ui_brain`
+- Run the Passive (observe-only) UI Brain: `(~/ui_brain &) > /dev/null 2>&1`
 
-- Run the Interactive UI Brain Brain: `~/active_ui_brain`
+- Run the Interactive UI Brain Brain: `(~/active_ui_brain &) > /dev/null 2>&1`
 
-- Run the Diego Brain: `~/original_diego_brain`
+- Run the Diego Brain: `(~/original_diego_brain &) > /dev/null 2>&1`
 
-- Run the Fenzo Brain: `java -jar ~/fenzo_brain-1.0-SNAPSHOT-jar-with-dependencies.jar`
+- Run the Fenzo Brain: `(java -jar ~/fenzo_brain-1.0-SNAPSHOT-jar-with-dependencies.jar &) > /dev/null 2>&1`
 
 ***2 - Run a brain: (from ssh session)***
 
