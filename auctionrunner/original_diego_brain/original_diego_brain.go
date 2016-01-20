@@ -34,42 +34,57 @@ func main() {
 		winnerScore := 1e20
 		var winnerCell *auctionrunner.SerializableCellState
 
-		zones := make(map[string]auctionrunner.Zone)
-		realCellsToSerialized := make(map[*auctionrunner.Cell]*auctionrunner.SerializableCellState)
-		for _, serializedCell := range auctionLRPRequest.SerializableCellStates {
-			cell := serializedCell.ToAuctionrunnerCell()
+
+		for _, cell := range auctionLRPRequest.SerializableCellStates {
 			lock.Lock()
-			zones[serializedCell.Zone] = append(zones[serializedCell.Zone], cell)
-			realCellsToSerialized[cell] = serializedCell
+			score := float64(len(cell.LRPs))
+			if score < winnerScore {
+				winnerScore = score
+				winnerCell = cell
+			}
 			lock.Unlock()
 		}
 
-		sortedZones := auctionrunner.AccumulateZonesByInstances(zones, auctionLRPRequest.LRP.ProcessGuid)
-//		sortedZones = auctionrunner.SortZonesByInstances(sortedZones)
-
-		for zoneIndex, lrpByZone := range sortedZones {
-			for _, realCell := range lrpByZone.Zone {
-				cell := realCellsToSerialized[realCell]
-				score, err := cell.ScoreForLRP(&auctionLRPRequest.LRP)
-				if err != nil {
-					continue
-				}
-
-				if score < winnerScore {
-					winnerScore = score
-					winnerCell = cell
-				}
-
-				if zoneIndex + 1 < len(sortedZones) &&
-				lrpByZone.Instances == sortedZones[zoneIndex + 1].Instances {
-					continue
-				}
-
-				if winnerCell != nil {
-					break
-				}
-			}
-		}
+//
+//		zones := make(map[string]auctionrunner.Zone)
+//		realCellsToSerialized := make(map[*auctionrunner.Cell]*auctionrunner.SerializableCellState)
+//		for _, serializedCell := range auctionLRPRequest.SerializableCellStates {
+//			cell := serializedCell.ToAuctionrunnerCell()
+//			lock.Lock()
+//			zones[serializedCell.Zone] = append(zones[serializedCell.Zone], cell)
+//			realCellsToSerialized[cell] = serializedCell
+//			lock.Unlock()
+//		}
+//
+//		sortedZones := auctionrunner.AccumulateZonesByInstances(zones, auctionLRPRequest.LRP.ProcessGuid)
+////		sortedZones = auctionrunner.SortZonesByInstances(sortedZones)
+//
+//		for zoneIndex, lrpByZone := range sortedZones {
+//			for _, realCell := range lrpByZone.Zone {
+//				cell := realCellsToSerialized[realCell]
+//				score, err := cell.ScoreForLRP(&auctionLRPRequest.LRP)
+//				if err != nil {
+//					continue
+//				}
+//
+//				//hack
+//				score = float64(len(cell.LRPs))
+//
+//				if score < winnerScore {
+//					winnerScore = score
+//					winnerCell = cell
+//				}
+//
+//				if zoneIndex + 1 < len(sortedZones) &&
+//				lrpByZone.Instances == sortedZones[zoneIndex + 1].Instances {
+//					continue
+//				}
+//
+//				if winnerCell != nil {
+//					break
+//				}
+//			}
+//		}
 
 		if winnerCell != nil {
 			data, err = json.Marshal(winnerCell)

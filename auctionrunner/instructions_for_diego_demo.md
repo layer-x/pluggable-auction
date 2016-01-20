@@ -55,6 +55,8 @@ VMs total: 8
 - view a running app through your web browser: go to http://APP_NAME.54.183.111.189.xip.io/ (i think this is a really good idea)
 - see attached brains (from SSH session): `curl -X GET 10.244.16.134:3000/ShowBrains`
 - delete attached brains (except default): `curl -X GET 10.244.16.134:3000/DeleteBrains`
+- clear the UI of the passive ui brain: `curl -X POST 127.0.0.1:3333/clear`
+- clear the UI of the active ui brain: `curl -X POST 127.0.0.1:4444/clear`
 
 ***1 - SSH to Bosh-Lite VM (running on Amazon)***
 

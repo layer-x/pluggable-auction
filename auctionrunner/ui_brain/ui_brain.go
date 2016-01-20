@@ -63,11 +63,22 @@ func main(){
 	m.Get("", func() string {
 		return mainPage(cells)
 	})
+	m.Post("/clear", func() string {
+		removeTasks(cells)
+		removeLRPs(cells)
+		return fmt.Sprintf("%v\n", cells)
+	})
 	m.RunOnAddr(port)
 }
 
 func removeTasks(cells map[string]*auctionrunner.SerializableCellState) {
 	for _, cell := range cells {
 		cell.Tasks = []rep.Task{}
+	}
+}
+
+func removeLRPs(cells map[string]*auctionrunner.SerializableCellState) {
+	for _, cell := range cells {
+		cell.LRPs = []rep.LRP{}
 	}
 }
