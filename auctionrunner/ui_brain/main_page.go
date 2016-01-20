@@ -583,10 +583,10 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
 			taskDisk := task.DiskMB
 			taskMem := task.MemoryMB
 			if len(taskId) > 4 {
-				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk:%v<br>mem:%v</li>
 	`, taskId, taskId[:4], taskDisk, taskMem)
 			} else {
-				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk:%v<br>mem:%v</li>
 	`, taskId, taskId, taskDisk, taskMem)
 			}
 		}
@@ -595,10 +595,10 @@ func mainPage(cells map[string]*auctionrunner.SerializableCellState) string {
 			lrpDisk := lrp.DiskMB
 			lrpMem := lrp.MemoryMB
 			if len(lrpId) > 4 {
-				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk:%v<br>mem:%v</li>
 	`, lrpId, lrpId[:4], lrpDisk, lrpMem)
 			} else {
-				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk:%v<br>mem:%v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)
 			}
 		}

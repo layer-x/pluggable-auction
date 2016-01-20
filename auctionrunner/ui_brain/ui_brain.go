@@ -73,12 +73,21 @@ func main(){
 
 func removeTasks(cells map[string]*auctionrunner.SerializableCellState) {
 	for _, cell := range cells {
+		for _, task := range cell.Tasks {
+			cell.AvailableResources.DiskMB += task.DiskMB
+			cell.AvailableResources.MemoryMB += task.MemoryMB
+		}
 		cell.Tasks = []rep.Task{}
 	}
 }
 
 func removeLRPs(cells map[string]*auctionrunner.SerializableCellState) {
 	for _, cell := range cells {
+		for _, lrp := range cell.LRPs {
+			cell.AvailableResources.DiskMB += lrp.DiskMB
+			cell.AvailableResources.MemoryMB += lrp.MemoryMB
+			cell.AvailableResources.Containers++
+		}
 		cell.LRPs = []rep.LRP{}
 	}
 }

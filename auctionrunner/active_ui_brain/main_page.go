@@ -584,7 +584,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk: %v<br>mem: %v</li>
 	`, taskId, taskId[0:4], taskDisk, taskMem)
 		} else {
-			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus: %v<br>mem: %v</li>
+			pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk: %v<br>mem: %v</li>
 	`, taskId, taskId, taskDisk, taskMem)
 		}
 	}
@@ -596,7 +596,7 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk: %v<br>mem: %v</li>
 	`, lrpId, lrpId[0:4], lrpDisk, lrpMem)
 		} else {
-			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus: %v<br>mem: %v</li>
+			pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk: %v<br>mem: %v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)
 		}
 	}
@@ -618,10 +618,10 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			taskDisk := task.DiskMB
 			taskMem := task.MemoryMB
 			if len(taskId) > 4 {
-				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk:%v<br>mem:%v</li>
 	`, taskId, taskId[0:4], taskDisk, taskMem)
 			} else {
-				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">Task %s<br>disk:%v<br>mem:%v</li>
 	`, taskId, taskId, taskDisk, taskMem)
 			}
 		}
@@ -630,10 +630,10 @@ func mainPage(pendingLRP *rep.LRP, pendingTask *rep.Task, cells map[string]*auct
 			lrpDisk := lrp.DiskMB
 			lrpMem := lrp.MemoryMB
 			if len(lrpId) > 4 {
-				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk:%v<br>mem:%v</li>
 	`, lrpId, lrpId[0:4], lrpDisk, lrpMem)
 			} else {
-				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>cpus:%v<br>mem:%v</li>
+				pageStr += fmt.Sprintf(`<li id="%s">LRP %s<br>disk:%v<br>mem:%v</li>
 	`, lrpId, lrpId, lrpDisk, lrpMem)
 			}
 		}
