@@ -53,6 +53,8 @@ VMs total: 8
 - delete running app in cf: `cf delete <app_name>`
 - scale running app in cf: `cf scale <app_name> -i <number_of_instances>`
 - view a running app through your web browser: go to http://APP_NAME.54.183.111.189.xip.io/ (i think this is a really good idea)
+- see attached brains (from SSH session): `curl -X GET 10.244.16.134:3000/ShowBrains`
+- delete attached brains (except default): `curl -X GET 10.244.16.134:3000/DeleteBrains`
 
 ***1 - SSH to Bosh-Lite VM (running on Amazon)***
 
@@ -109,7 +111,7 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
     - run:
 
     ```
-      curl -X curl -X POST 10.244.16.134:3000/Start \
+      curl -X POST 10.244.16.134:3000/Start \
       -d '{"name":"passive_ui_brain","url":"http://172.31.0.196:3333","tags":"ui"}'
     ```
 
@@ -123,7 +125,7 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
   - run:
 
     ```
-      curl -X curl -X POST 10.244.16.134:3000/Start \
+      curl -X POST 10.244.16.134:3000/Start \
       -d '{"name":"active_ui_brain","url":"http://172.31.0.196:4444","tags":"active-ui"}'
     ```
 
@@ -133,7 +135,7 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
     - run:
 
     ```
-      curl -X curl -X POST 10.244.16.134:3000/Start \
+      curl -X POST 10.244.16.134:3000/Start \
       -d '{"name":"diego_brain","url":"http://172.31.0.196:6666","tags":"default,diego"}'
     ```
 
@@ -141,7 +143,7 @@ UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
   - run:
 
     ```
-      curl -X curl -X POST 10.244.16.134:3000/Start \
+      curl -X POST 10.244.16.134:3000/Start \
       -d '{"name":"fenzo_brain","url":"http://172.31.0.196:5555","tags":"fenzo"}'
       ```
 
@@ -182,34 +184,6 @@ applications:
 
 *2 - To use it:*
 
-  a - replace all instances of the ip `54.183.111.189` with `54.183.111.189` (for `ssh ...`, `bosh target ...` and `cf login ...`)
+  a - replace all instances of the ip `54.183.111.189` with `54.183.147.206` (for `ssh ...`, `bosh target ...` and `cf login ...`)
 
-  b - replace the bosh-lite private ip `172.31.0.196` with `172.31.0.196` (for commands that assign Brains to diego)
-
-  c - and replace the ssh key in `bosh.pem` with:
-
-```
------BEGIN RSA PRIVATE KEY-----
-MIIEpQIBAAKCAQEAmT+wbEFqGmBglzFJlxid3Vk1zMsznuG3eb32RP6P65JQysh+w65AwYz6BiIx
-3hj8Y7P3TsznKCjUY/z8jXve3ydoAEh62rSD/BZNeyYCHmADQEwyNORQU/AplUPKdsqYoVXadwAB
-Pmd4HJ84KBxzMZWyFGtzqM0QhbUY0wuxqcy0SwRW8pIo6/BSHWBKKyEMWR/2f9SG6j2g8PR0/iwU
-9QXqrGSQVKjR0wDP7zwSGTrdA08I7a/KmbgQyOWLOz8xL5jxwJ7pXPjA4oyfagjAC2SN/9FFm3LX
-sy+hS6f8f3zV+fEy29k8o6mH3WGaScrmlXGShnhgcygrt0mwHAl8UwIDAQABAoIBAQCPIN3MbdgE
-JIlyDFV36kTezAgkapCezp+G87WDwOF4GiKdEl7ase/HFb0aZ2t9zIZFNHtBPLyUVHXxoQHbvpps
-fyhyQz+C7l/q3IWnA9ustO20arXlkmu3ybF8uGDrS9L7s+yjgfynZQnYaZiQVen8oJw+2BCg0k2h
-I3+49M4NEC7qxguIorTplcJI7dXpXjOy0MZ4D0QUTOBAKEzx99Gx4dDB0vDI9kznJXx0kXlQw1KU
-4gD/KkIIrWDQXOmfNme4s1pn6e0cAaCfEic69MMDZ/NvG0AEvvZZjNPsExoltlqPb62Gh/CNoAlj
-XAFQM60Li+uO4rqkSqPPOTSNNjohAoGBAOKPRF5LGm6uYFi/svBhpl8naxy71WDSKGw0bF8gv6ML
-xudTuN62R/ggEq8vciNJdhpPlOA4ewFTJXIAJECYe4T5XntvmfSVXd/3I3A223+5DV1QEWKh71wP
-aGyyh7wNV7VWReNSvq0zv6giQqALKanPHwhjF8ALcexfixnDqPKjAoGBAK0pqc2oBd9FKLP5FgDR
-fxJrpsi5GkeGlxVsOSJMTdGXyrxY/FHFbc/rLGFbyK/eqvQpg2/mWSWpKZtRbaopPZxQafx6ZgeF
-cvNrZ9HU7TXqR1XdEj7peWYZKiI/CHHUAbfd+7eiaNIjx26Q+kL89T1dDUDwVIVB052ipZkzNpqR
-AoGBAIv7s2WDiABtE7CiOYCXBUHzzBXD5PJex4Ub2v3n8SBfzXTu4OISxGMGBiVh7mbpI+Tb2QO1
-QiMuaYuHlN6omGEv5vXjnb9mbstMGwRhkLvY7e4C48sKfSdnicDnikBiChhMBwCPBqtjtv6+tGXI
-n+SAyg7XkzwgljJTUlIH96J7AoGBAKoJeWYrEekWXkur0kFndmI+N35u1TFbJkyxAsF9MAUaCsg8
-kTgyqAw9IE1R9ZVND43GnfxpsyxaGjMcGJW4/XjbNdfo0PudvSzuUPopHe2NahMUjHAej0kEeO07
-/CzaQ/2rCxxdbJS88X7O+hCBmMdy8irMVBKuewAV0IrJUVshAoGAM1Ws17TBurocG8+jNHjuCpJw
-pGvwvmJpwojl6D4+2a2yoP9l2zFQRxbZroFM7rFp/7qwyVxIob5oWkJh/NhEN5iW3UqwhZRyFxq1
-UD8cA25rhOiV1Nhl+pvr5yRolMvhyaVOqCXNWyfGROOKN2HtHf6+q1yRSIFPbA0S0VvXHkI=
------END RSA PRIVATE KEY-----
-```
+  b - replace the bosh-lite private ip `172.31.0.196` with `172.31.15.213` (for commands that assign Brains to diego)
