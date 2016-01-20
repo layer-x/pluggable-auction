@@ -127,7 +127,7 @@ a0kHkTGyH/yLnpVHrb19ttlWAgPQT3ZKUQgw8vj2WYTAUwWJTBpRtdiLNXJKDpjvosPGspAsYjGj
       -d '{"name":"active_ui_brain","url":"http://172.31.29.198:4444","tags":"default"}'
     ```
 
-  - view the active ui at http://54.67.93.53:4444
+  - view the active ui at http://54.67.93.53:4444/brain
 
 - Register the Diego Brain with the Auctioneer, using the tags "default", and "diego":
     - run:
